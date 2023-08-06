@@ -1,0 +1,114 @@
+﻿@page "/admin"
+@using ContactDatabase.API.Shared
+@using System.Text.Json;
+@using System.Text
+
+<h3>Add New Contact</h3>
+<div class="form-group">
+    <label for="firstName">First Name</label>
+    <input type="text" class="form-control" id="firstName" @bind="@newContact.FirstName" required>
+</div>
+<div class="form-group">
+    <label for="lastName">Last Name</label>
+    <input type="text" class="form-control" id="lastName" @bind="@newContact.LastName" required>
+</div>
+<div class="form-group">
+    <label for="email">Email</label>
+    <input type="email" class="form-control" id="email" @bind="@newContact.Email" required>
+</div>
+<div class="form-group">
+    <label for="title">Title</label>
+    <input type="text" class="form-control" id="title" @bind="@newContact.Title" required>
+</div>
+<div class="form-group">
+    <label for="description">Description</label>
+    <input type="text" class="form-control" id="description" @bind="@newContact.Description">
+</div>
+<div class="form-group">
+    <label for="dateOfBirth">Date of Birth</label>
+    <input type="date" class="form-control" id="dateOfBirth" @bind="@newContact.DateOfBirth" required>
+</div>
+<div class="form-group">
+    <label for="marriageStatus">Marriage Status</label>
+    <input type="checkbox" class="form-check-input" id="marriageStatus" @bind="@newContact.MarriageStatus">
+</div>
+<button type="button" class="btn btn-primary" @onclick="AddContact">Add Contact</button>
+
+<h3>Contacts List</h3>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Email</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Date of Birth</th>
+            <th>Marriage Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var contact in contacts)
+        {
+            <tr>
+                <td>@contact.FirstName</td>
+                <td>@contact.LastName</td>
+                <td>@contact.Email</td>
+                <td>@contact.Title</td>
+                <td>@contact.Description</td>
+                <td>@contact.DateOfBirth.ToShortDateString()</td>
+                <td>@(contact.MarriageStatus ? "Married" : "Single")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<ContactDatabase.API.Shared.Contact> contacts;
+    private ContactDatabase.API.Shared.Contact newContact = new ContactDatabase.API.Shared.Contact();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadContacts();
+    }
+
+    private async Task LoadContacts()
+    {
+
+        using (var httpClient = new HttpClient())
+        {
+            var response = await httpClient.GetAsync("http://localhost:5081/api/contacts");
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonString = await response.Content.ReadAsStringAsync();
+                contacts = JsonSerializer.Deserialize<List<ContactDatabase.API.Shared.Contact>>(jsonString);
+            }
+            else
+            {
+                // Handle error
+                contacts = new List<ContactDatabase.API.Shared.Contact>();
+            }
+        }
+    }
+
+
+    private async Task AddContact()
+    {
+        using (var httpClient = new HttpClient())
+        {
+            var json = JsonSerializer.Serialize(newContact);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await httpClient.PostAsync("http://localhost:5081/api/contacts", content);
+            if (response.IsSuccessStatusCode)
+            {
+                newContact = new ContactDatabase.API.Shared.Contact();
+                await LoadContacts();
+            }
+            else
+            {
+                // Handle error
+            }
+        }
+    }
+
+}
