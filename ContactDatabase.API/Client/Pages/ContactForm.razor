@@ -75,7 +75,7 @@
     public Contact? Contact { get; set; }
     [Parameter]
     public bool EditMode { get; set; }
-    private string ErrorMessage { get; set; } = "";
+    private string _errorMessage { get; set; } = "";
 
     private async Task HandleFormSubmit()
     {
@@ -88,7 +88,7 @@
             if (response.IsSuccessStatusCode)
                 NavigationManager.NavigateTo("/");
             else
-                ErrorMessage = "Failed to update the contact. Try again later.";
+                _errorMessage = "Failed to update the contact. Try again later.";
         }
         else
         {
@@ -99,7 +99,7 @@
             if (response.IsSuccessStatusCode)
                 NavigationManager.NavigateTo("/");
             else
-                ErrorMessage = "All fields are required.";
+                _errorMessage = "All fields are required.";
         }
     }
 }
