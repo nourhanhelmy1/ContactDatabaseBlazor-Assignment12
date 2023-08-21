@@ -28,11 +28,11 @@
             </tr>
         </thead>
         <tbody id="myTable">
-            @if (ContactsList.Count > 0)
+            @if (_contactsList.Count > 0)
             {
-                @for (int i = 0; i < ContactsList.Count; i++)
+                @for (int i = 0; i < _contactsList.Count; i++)
                 {
-                    var contact = ContactsList[i];
+                    var contact = _contactsList[i];
 
                     var rowClass = i % 2 == 0 ? "even-row" : "odd-row";
                     var married = contact.MarriageStatus == true ? "married" : "not married";
@@ -75,8 +75,8 @@
 </div>
 
 @code {
-    private List<Contact> ContactsList = new();
-    private string ErrorMessage = "";
+    private List<Contact> _contactsList = new();
+    private string _errorMessage = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -87,14 +87,14 @@
             if (response.IsSuccessStatusCode)
             {
                 string json = await response.Content.ReadAsStringAsync();
-                ContactsList = JsonSerializer.Deserialize<List<Contact>>(json);
+                _contactsList = JsonSerializer.Deserialize<List<Contact>>(json);
 
-                if (ContactsList != null && ContactsList.Count < 0)
-                    ErrorMessage = "No contacts to show.";
+                if (_contactsList != null && _contactsList.Count < 0)
+                    _errorMessage = "No contacts to show.";
             }
             else
             {
-                ErrorMessage = "Failed to fetch the contacts.";
+                _errorMessage = "Failed to fetch the contacts.";
             }
         }
         catch (AccessTokenNotAvailableException exception)
